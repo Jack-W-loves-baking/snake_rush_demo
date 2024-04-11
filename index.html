@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake run</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      // Set up the scene, camera, and renderer
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // Create the snake head as a cube
+      const snakeGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const snakeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const snakeHead = new THREE.Mesh(snakeGeometry, snakeMaterial);
+      snakeHead.position.z = -5;
+      snakeHead.position.y = 0.5; // Lift the snake up to be "on" the road
+      scene.add(snakeHead);
+
+      // Set up the camera
+      camera.position.z = 5;
+
+      camera.position.z = 1; // Move the camera back
+      camera.position.y = 5; // Lift the camera up
+      camera.lookAt(new THREE.Vector3(0, 0, -50)); // Look at the center of the road
+
+      // Create a group to hold the road segments
+      const roadGroup = new THREE.Group();
+
+      // Create the road segments and add them to the road group
+      const roadSegments = [];
+      const roadLength = 100;
+      const roadWidth = 10;
+      const roadColor = 0x444444;
+      const numberOfSegments = 20;
+      const roadStartZ =
+        camera.position.z - (numberOfSegments * roadLength) / 2; // Start in the middle of the camera
+
+      const roadGeometry = new THREE.PlaneGeometry(roadWidth, roadLength);
+      const roadMaterial = new THREE.MeshBasicMaterial({ color: roadColor });
+
+      for (let i = 0; i < numberOfSegments; i++) {
+        const roadSegment = new THREE.Mesh(roadGeometry, roadMaterial);
+        roadSegment.rotation.x = -Math.PI / 2; // Rotate to lay flat
+        roadSegment.position.z = roadStartZ + i * roadLength;
+        scene.add(roadSegment);
+        roadSegments.push(roadSegment);
+      }
+
+      const loader = new THREE.TextureLoader();
+      const cardGeometry = new THREE.PlaneGeometry(5, 3); // Adjust size as needed
+
+      // Function to create a card mesh
+      function createCardMesh(texture) {
+        return new THREE.Mesh(
+          cardGeometry,
+          new THREE.MeshBasicMaterial({ map: texture })
+        );
+      }
+
+      // Load textures and create cards
+      loader.load("/resources/a.jpg", function (textureA) {
+        const cardMeshA = createCardMesh(textureA);
+        cardMeshA.position.set(-6, -4, -20); // Left of the first question card
+        scene.add(cardMeshA); // Add immediately to the scene
+      });
+
+      loader.load("/resources/b.jpg", function (textureB) {
+        const cardMeshB = createCardMesh(textureB);
+        cardMeshB.position.set(6, -4, -20); // Right of the first question card
+        scene.add(cardMeshB); // Add immediately to the scene
+      });
+      loader.load("/resources/question.jpg", function (texture) {
+        // Once the texture is loaded
+        const cardGeometry = new THREE.PlaneGeometry(20, 20); // Adjust size as needed
+        const cardMaterial = new THREE.MeshBasicMaterial({ map: texture });
+        const cardMesh = new THREE.Mesh(cardGeometry, cardMaterial);
+
+        // Set the position of the card in the scene
+        cardMesh.position.set(0, 5, -50); // Adjust position as needed
+
+        // Show the card after 3 seconds
+        setTimeout(function () {
+          scene.add(cardMesh);
+        }, 3000);
+      });
+
+      // Variables to store the movement direction
+      let moveLeft = false;
+      let moveRight = false;
+
+      // Event listeners for key down and key up to handle continuous movement while keys are pressed
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "a" || event.key === "A") {
+          moveLeft = true;
+        }
+        if (event.key === "d" || event.key === "D") {
+          moveRight = true;
+        }
+      });
+
+      document.addEventListener("keyup", function (event) {
+        if (event.key === "a" || event.key === "A") {
+          moveLeft = false;
+        }
+        if (event.key === "d" || event.key === "D") {
+          moveRight = false;
+        }
+      });
+
+      // Calculate boundaries for the snake based on the road width
+      const boundary = roadWidth / 2;
+
+      // Game loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Move the snake left or right
+        if (moveLeft && snakeHead.position.x > -boundary) {
+          snakeHead.position.x -= 0.1;
+        }
+        if (moveRight && snakeHead.position.x < boundary) {
+          snakeHead.position.x += 0.1;
+        }
+
+        // Move the road towards the camera
+        roadGroup.children.forEach((segment) => {
+          segment.position.z += 0.1;
+          // When a segment goes out of view, reset its position to the start
+          if (segment.position.z > camera.position.z) {
+            segment.position.z -= numberOfSegments * roadLength;
+          }
+        });
+
+        // if (questionCardMesh.position.z < 0) {
+        //   questionCardMesh.position.z += 0.1; // Adjust speed as necessary
+        // }
+
+        renderer.render(scene, camera);
+      }
+
+      // Start the game loop
+      animate();
+    </script>
+  </body>
+</html>
