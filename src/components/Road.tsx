@@ -64,14 +64,14 @@ export const Road = ({
     const snakeMove = Math.ceil(groupRef.current!.position.z + 2);
     const snakeX = snakeRef.current.position.x;
     if (Math.abs(snakeMove - segmentMove) < 3) {
-      if ((snakeX <= 0 && answer === 'a') || (snakeX > 0 && answer === 'b')) {
-        if (curSegmentRef.current !== curSegment) {
-          curSegmentRef.current = curSegment;
+      if (curSegmentRef.current !== curSegment) {
+        if ((snakeX <= 0 && answer === 'a') || (snakeX > 0 && answer === 'b')) {
           setRoadSpeed(pre => (pre > 7 ? pre : pre + 0.2));
           setTotalCorrect(pre => pre + 1);
+        } else {
+          setRoadSpeed(pre => (pre - 0.2 <= 0 ? 0.2 : pre - 0.2));
         }
-      } else {
-        setRoadSpeed(pre => (pre - 0.5 <= 0 ? 0.2 : pre - 0.2));
+        curSegmentRef.current = curSegment;
       }
     }
   });
