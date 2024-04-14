@@ -12,6 +12,7 @@ import {
   ROAD_INIT_POSITION,
   ROAD_LENGTH,
   ROAD_SPEED,
+  BLOCK_INIT_SIZE,
   ROAD_WIDTH,
   SEGMENT_NUMBER,
   SNAKE_INIT_SIZE,
@@ -24,8 +25,9 @@ interface RoadSegment {
   position: Position;
 }
 
-export const Road = () => {
+export const Road = ({snakeRef, setCurIndex, answer}) => {
   const { camera } = useThree();
+  const [roadSpeed, setRoadSpeed] = useState<number>(ROAD_SPEED);
 
   const groupRef = useRef<Group>(null);
 
@@ -52,9 +54,27 @@ export const Road = () => {
     if (groupRef.current) {
       const groupZ = groupRef.current.position.z;
 
-      groupRef.current.position.z += ROAD_SPEED;
+      groupRef.current.position.z += roadSpeed;
+
     }
   });
+
+  useFrame(
+    () => {
+      const curSegment = Math.ceil(groupRef.current.position.z / ROAD_LENGTH + 0.5);
+      setCurIndex(curSegment);
+      const segmentMove = curSegment * ROAD_LENGTH - (ROAD_LENGTH / 2);
+      const snakeMove = Math.ceil(groupRef.current.position.z + 2);
+      const snakeX = snakeRef.current.position.x;
+      if (Math.abs(snakeMove - segmentMove) < 3) { 
+        if (snakeX < 0 && answer === 'a' || snakeX > 0 && answer === 'b' ) {
+          setRoadSpeed(pre => pre > 7 ? pre : pre + 0.2);
+        } else {
+          setRoadSpeed(pre => (pre - 0.5) <= 0 ? 0.5 : pre - 0.5);
+        }
+      }
+    }
+  );
   return (
     <group ref={groupRef}>
       {segments.map((segment, i) => (
@@ -72,8 +92,8 @@ export const Road = () => {
               segment.position[2],
             ]}
           >
-            <boxGeometry args={SNAKE_INIT_SIZE} />
-            <meshStandardMaterial color={COLOR.GREEN} />
+            <boxGeometry args={BLOCK_INIT_SIZE} />
+            <meshStandardMaterial color="dodgerblue" />
           </mesh>
           <mesh
             position={[
@@ -82,8 +102,8 @@ export const Road = () => {
               segment.position[2],
             ]}
           >
-            <boxGeometry args={SNAKE_INIT_SIZE} />
-            <meshStandardMaterial color={COLOR.GREEN} />
+            <boxGeometry args={BLOCK_INIT_SIZE} />
+            <meshStandardMaterial color="navajowhite" />
           </mesh>
         </group>
       ))}

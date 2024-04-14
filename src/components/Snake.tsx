@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { useRef } from 'react';
 import { Mesh } from 'three';
 
@@ -16,10 +16,10 @@ export interface Props {
   initPosition: [number, number, number];
 }
 
-export const Snake = () => {
+export const Snake = forwardRef(({}, ref) => {
   const [position, setPosition] =
     useState<[number, number, number]>(SNAKE_INIT_POSITION);
-  const snakeRef = useRef<Mesh>(null);
+  // const snakeRef = useRef<Mesh>(null);
 
   const { pos } = useSpring({
     pos: position,
@@ -53,9 +53,9 @@ export const Snake = () => {
   }, []);
 
   return (
-    <a.mesh position={pos} ref={snakeRef}>
+    <a.mesh position={pos} ref={ref}>
       <boxGeometry args={SNAKE_INIT_SIZE} />
       <meshStandardMaterial color={COLOR.GREEN} />
     </a.mesh>
   );
-};
+});
