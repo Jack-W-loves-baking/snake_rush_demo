@@ -1,14 +1,16 @@
-import "./App.css";
-import { Canvas } from "@react-three/fiber";
+import { Canvas } from '@react-three/fiber';
+import { Road, Snake } from './components';
+import './App.css';
+
+import { Camera } from './components/Camera';
 
 function App() {
   return (
-    <div id="canvas-container">
+    <div className="canvas-container">
       <Canvas>
-        <mesh>
-          <boxGeometry />
-          <meshStandardMaterial />
-        </mesh>
+        <Camera />
+        <Snake />
+        <Road />
       </Canvas>
     </div>
   );
