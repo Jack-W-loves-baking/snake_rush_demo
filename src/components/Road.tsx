@@ -13,11 +13,8 @@ import {
 } from '../constants';
 import { Position } from '../types';
 
+import { Button } from './Button';
 import { Line } from './Line';
-
-interface RoadSegment {
-  position: Position;
-}
 
 export const Road = ({
   snakeRef,
@@ -26,7 +23,7 @@ export const Road = ({
   setTotalCorrect,
   setRoadSpeed,
   roadSpeed,
-}) => {
+}: RoadSegment) => {
   const groupRef = useRef<Group>(null);
   const curSegmentRef = useRef<number>(-1);
   const roadStartZ = ROAD_INIT_POSITION[2];
@@ -35,6 +32,7 @@ export const Road = ({
     side: DoubleSide,
   });
 
+  const [stop, setStop] = useState<boolean>(true);
   const [segments, setSegments] = useState<RoadSegment[]>(() =>
     Array.from({ length: SEGMENT_NUMBER }, (_, i) => ({
       position: [
@@ -49,12 +47,12 @@ export const Road = ({
   );
 
   useFrame(() => {
+    if (stop) {
+      return;
+    }
     if (groupRef.current) {
       groupRef.current.position.z += roadSpeed;
     }
-  });
-
-  useFrame(() => {
     const curSegment = Math.ceil(
       groupRef.current!.position.z / ROAD_LENGTH + 0.5
     );
@@ -76,46 +74,53 @@ export const Road = ({
     }
   });
   return (
-    <group ref={groupRef}>
-      {segments.map((segment, i) => (
-        <group key={i}>
-          <mesh
-            rotation-x={-Math.PI / 2}
-            position={segment.position}
-            geometry={new PlaneGeometry(ROAD_WIDTH, ROAD_LENGTH)}
-            material={roadMaterial}
-          />
-          <mesh
-            position={[
-              segment.position[0] - 10,
-              segment.position[1] + 2,
-              segment.position[2],
-            ]}
-          >
-            <boxGeometry args={BLOCK_INIT_SIZE} />
-            <meshStandardMaterial color="dodgerblue" />
-          </mesh>
+    <>
+      <group ref={groupRef}>
+        {segments.map((segment, i) => (
+          <group key={i}>
+            <mesh
+              rotation-x={-Math.PI / 2}
+              position={segment.position}
+              geometry={new PlaneGeometry(ROAD_WIDTH, ROAD_LENGTH)}
+              material={roadMaterial}
+            />
+            <mesh
+              position={[
+                segment.position[0] - 10,
+                segment.position[1] + 2,
+                segment.position[2],
+              ]}
+            >
+              <boxGeometry args={BLOCK_INIT_SIZE} />
+              <meshStandardMaterial color="dodgerblue" />
+            </mesh>
 
-          <mesh
-            position={[
-              segment.position[0] + 10,
-              segment.position[1] + 2,
-              segment.position[2],
-            ]}
-          >
-            <boxGeometry args={BLOCK_INIT_SIZE} />
-            <meshStandardMaterial color="orangered" />
-          </mesh>
-        </group>
-      ))}
-      <Line
-        start={[0, 0, roadStartZ + SNAKE_INIT_SIZE[2] / 2]}
-        end={[
-          0,
-          0,
-          roadStartZ - ROAD_LENGTH * SEGMENT_NUMBER + SNAKE_INIT_SIZE[2] / 2,
-        ]}
+            <mesh
+              position={[
+                segment.position[0] + 10,
+                segment.position[1] + 2,
+                segment.position[2],
+              ]}
+            >
+              <boxGeometry args={BLOCK_INIT_SIZE} />
+              <meshStandardMaterial color="orangered" />
+            </mesh>
+          </group>
+        ))}
+        <Line
+          start={[0, 0, roadStartZ + SNAKE_INIT_SIZE[2] / 2]}
+          end={[
+            0,
+            0,
+            roadStartZ - ROAD_LENGTH * SEGMENT_NUMBER + SNAKE_INIT_SIZE[2] / 2,
+          ]}
+        />
+      </group>
+      <Button
+        position={[0, 0, 15]}
+        label={stop ? 'Start' : 'Pause'}
+        onClick={() => setStop(!stop)}
       />
-    </group>
+    </>
   );
 };

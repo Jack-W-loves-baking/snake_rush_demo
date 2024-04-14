@@ -13,7 +13,7 @@ export const Camera = () => {
     <>
       <ambientLight intensity={1} />
 
-      {/* <CameraControls ref={cameraControlRef} /> */}
+      <CameraControls ref={cameraControlRef} />
     </>
   );
 };
