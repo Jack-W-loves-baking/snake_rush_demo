@@ -34,11 +34,7 @@ export const SNAKE_INIT_SIZE: [number, number, number] = [
   SIZE_HEIGHT,
   SIZE_DEPTH,
 ];
-export const BLOCK_INIT_SIZE: [number, number, number] = [
-  18,
-  4,
-  4,
-];
+export const BLOCK_INIT_SIZE: [number, number, number] = [18, 4, 4];
 export const SNAKE_MOVE_SPEED = 20;
 export const SNAKE_COLOR = COLOR.GREEN;
 

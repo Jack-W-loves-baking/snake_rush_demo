@@ -1,36 +1,34 @@
+import { useFrame } from '@react-three/fiber';
 import { useRef, useState } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { DoubleSide, Group, MeshBasicMaterial, PlaneGeometry } from 'three';
+
 import {
-  PlaneGeometry,
-  MeshBasicMaterial,
-  DoubleSide,
-  Mesh,
-  Group,
-} from 'three';
-import {
-  COLOR,
+  BLOCK_INIT_SIZE,
   ROAD_INIT_POSITION,
   ROAD_LENGTH,
   ROAD_SPEED,
-  BLOCK_INIT_SIZE,
   ROAD_WIDTH,
   SEGMENT_NUMBER,
   SNAKE_INIT_SIZE,
 } from '../constants';
-import { Line } from './Line';
 import { Position } from '../types';
-import { Snake } from './Snake';
+
+import { Line } from './Line';
 
 interface RoadSegment {
   position: Position;
 }
 
-export const Road = ({snakeRef, setCurIndex, answer}) => {
-  const { camera } = useThree();
-  const [roadSpeed, setRoadSpeed] = useState<number>(ROAD_SPEED);
-
+export const Road = ({
+  snakeRef,
+  setCurIndex,
+  answer,
+  setTotalCorrect,
+  setRoadSpeed,
+  roadSpeed,
+}) => {
   const groupRef = useRef<Group>(null);
-
+  const curSegmentRef = useRef<number>(-1);
   const roadStartZ = ROAD_INIT_POSITION[2];
   const roadMaterial = new MeshBasicMaterial({
     color: 'white',
@@ -52,29 +50,31 @@ export const Road = ({snakeRef, setCurIndex, answer}) => {
 
   useFrame(() => {
     if (groupRef.current) {
-      const groupZ = groupRef.current.position.z;
-
       groupRef.current.position.z += roadSpeed;
-
     }
   });
 
-  useFrame(
-    () => {
-      const curSegment = Math.ceil(groupRef.current.position.z / ROAD_LENGTH + 0.5);
-      setCurIndex(curSegment);
-      const segmentMove = curSegment * ROAD_LENGTH - (ROAD_LENGTH / 2);
-      const snakeMove = Math.ceil(groupRef.current.position.z + 2);
-      const snakeX = snakeRef.current.position.x;
-      if (Math.abs(snakeMove - segmentMove) < 3) { 
-        if (snakeX < 0 && answer === 'a' || snakeX > 0 && answer === 'b' ) {
-          setRoadSpeed(pre => pre > 7 ? pre : pre + 0.2);
-        } else {
-          setRoadSpeed(pre => (pre - 0.5) <= 0 ? 0.5 : pre - 0.5);
+  useFrame(() => {
+    const curSegment = Math.ceil(
+      groupRef.current!.position.z / ROAD_LENGTH + 0.5
+    );
+    setCurIndex(curSegment);
+
+    const segmentMove = curSegment * ROAD_LENGTH - ROAD_LENGTH / 2;
+    const snakeMove = Math.ceil(groupRef.current!.position.z + 2);
+    const snakeX = snakeRef.current.position.x;
+    if (Math.abs(snakeMove - segmentMove) < 3) {
+      if ((snakeX <= 0 && answer === 'a') || (snakeX > 0 && answer === 'b')) {
+        if (curSegmentRef.current !== curSegment) {
+          curSegmentRef.current = curSegment;
+          setRoadSpeed(pre => (pre > 7 ? pre : pre + 0.2));
+          setTotalCorrect(pre => pre + 1);
         }
+      } else {
+        setRoadSpeed(pre => (pre - 0.5 <= 0 ? 0.2 : pre - 0.2));
       }
     }
-  );
+  });
   return (
     <group ref={groupRef}>
       {segments.map((segment, i) => (
@@ -95,6 +95,7 @@ export const Road = ({snakeRef, setCurIndex, answer}) => {
             <boxGeometry args={BLOCK_INIT_SIZE} />
             <meshStandardMaterial color="dodgerblue" />
           </mesh>
+
           <mesh
             position={[
               segment.position[0] + 10,
@@ -103,7 +104,7 @@ export const Road = ({snakeRef, setCurIndex, answer}) => {
             ]}
           >
             <boxGeometry args={BLOCK_INIT_SIZE} />
-            <meshStandardMaterial color="navajowhite" />
+            <meshStandardMaterial color="orangered" />
           </mesh>
         </group>
       ))}

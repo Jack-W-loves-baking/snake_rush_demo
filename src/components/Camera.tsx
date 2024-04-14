@@ -1,7 +1,6 @@
-import { useRef } from 'react';
-
 import { CameraControls } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
+import { useRef } from 'react';
 
 export const Camera = () => {
   const cameraControlRef = useRef<CameraControls | null>(null);
@@ -13,7 +12,8 @@ export const Camera = () => {
   return (
     <>
       <ambientLight intensity={1} />
-      <CameraControls ref={cameraControlRef} />
+
+      {/* <CameraControls ref={cameraControlRef} /> */}
     </>
   );
 };
