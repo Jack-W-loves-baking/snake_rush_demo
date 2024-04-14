@@ -52,4 +52,4 @@ export const ROAD_LENGTH = 100;
 export const ROAD_WIDTH = 40;
 export const ROAD_COLOR = COLOR.BLACK;
 export const ROAD_SPEED = 1;
-export const SEGMENT_NUMBER = 3;
+export const SEGMENT_NUMBER = 99;

@@ -1,44 +1,41 @@
-import { forwardRef, useMemo } from 'react';
+import { useRef, useMemo, useLayoutEffect } from 'react';
 import * as THREE from 'three';
-import { useLayoutEffect } from 'react';
 
+import { Mesh } from 'three';
 import { Position } from '../types';
-import { useThree } from '@react-three/fiber';
 
 interface Props {
   start: Position;
   end: Position;
   thickness?: number;
 }
-export const Line = forwardRef<THREE.Mesh, Props>(
-  ({ start, end, thickness = 0.1 }, ref) => {
-    const curve = useMemo(() => {
-      const points = [start, end].map(point => new THREE.Vector3(...point));
-      return new THREE.CatmullRomCurve3(points);
-    }, [start, end]);
 
-    const { scene } = useThree();
+export const Line = ({ start, end, thickness = 0.1 }: Props) => {
+  const lineRef = useRef<Mesh>(null);
 
-    useLayoutEffect(() => {
-      if (ref && (ref as any).current) {
-        const geometry = new THREE.TubeGeometry(curve, 20, thickness, 8, false);
-        (ref as any).current.geometry.dispose();
-        (ref as any).current.geometry = geometry;
-        scene.add((ref as any).current);
+  // Recreate the curve whenever start or end points change
+  const curve = useMemo(() => {
+    const points = [new THREE.Vector3(...start), new THREE.Vector3(...end)];
+    return new THREE.CatmullRomCurve3(points);
+  }, [start, end]);
 
-        return () => {
-          if ((ref as any).current) {
-            scene.remove((ref as any).current);
-          }
-          geometry.dispose();
-        };
-      }
-    }, [curve, thickness, ref, scene]);
+  useLayoutEffect(() => {
+    if (lineRef.current) {
+      const geometry = new THREE.TubeGeometry(curve, 20, thickness, 8, false);
+      lineRef.current.geometry.dispose(); // Dispose of the old geometry
+      lineRef.current.geometry = geometry; // Assign new geometry
 
-    return (
-      <mesh ref={ref}>
-        <meshBasicMaterial color="darkseagreen" />
-      </mesh>
-    );
-  }
-);
+      // You might not need to add/remove the line to/from the scene each time
+      // unless it's being dynamically added or removed from the scene.
+      return () => {
+        geometry.dispose();
+      };
+    }
+  }, [curve, thickness, lineRef]); // Remove `ref` and `scene` as dependencies, they're not changing
+
+  return (
+    <mesh ref={lineRef}>
+      <meshBasicMaterial color="darkseagreen" />
+    </mesh>
+  );
+};

@@ -1,7 +1,14 @@
 import { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { PlaneGeometry, MeshBasicMaterial, DoubleSide, Mesh } from 'three';
 import {
+  PlaneGeometry,
+  MeshBasicMaterial,
+  DoubleSide,
+  Mesh,
+  Group,
+} from 'three';
+import {
+  COLOR,
   ROAD_INIT_POSITION,
   ROAD_LENGTH,
   ROAD_SPEED,
@@ -11,6 +18,7 @@ import {
 } from '../constants';
 import { Line } from './Line';
 import { Position } from '../types';
+import { Snake } from './Snake';
 
 interface RoadSegment {
   position: Position;
@@ -18,9 +26,8 @@ interface RoadSegment {
 
 export const Road = () => {
   const { camera } = useThree();
-  const [isAnimating, setIsAnimating] = useState(true);
 
-  const lineRef = useRef<Mesh>(null);
+  const groupRef = useRef<Group>(null);
 
   const roadStartZ = ROAD_INIT_POSITION[2];
   const roadMaterial = new MeshBasicMaterial({
@@ -42,45 +49,51 @@ export const Road = () => {
   );
 
   useFrame(() => {
-    if (!isAnimating) {
-      return;
-    }
+    if (groupRef.current) {
+      const groupZ = groupRef.current.position.z;
 
-    const newSegments = segments.map(segment => {
-      let newPosZ = segment.position[2] + ROAD_SPEED;
-      // Reset position if it goes beyond the camera's view
-      const endPosZ =
-        ROAD_INIT_POSITION[2] + ROAD_LENGTH / 2 - SNAKE_INIT_SIZE[2] / 2;
-      if (newPosZ > endPosZ) {
-        newPosZ = endPosZ;
-      }
-      return {
-        position: [segment.position[0], segment.position[1], newPosZ],
-      } as RoadSegment;
-    });
-    setSegments(newSegments);
-
-    if (lineRef.current) {
-      lineRef.current.position.z += ROAD_SPEED;
+      groupRef.current.position.z += ROAD_SPEED;
     }
   });
   return (
-    <group>
+    <group ref={groupRef}>
       {segments.map((segment, i) => (
-        <>
+        <group key={i}>
           <mesh
-            key={i}
             rotation-x={-Math.PI / 2}
             position={segment.position}
             geometry={new PlaneGeometry(ROAD_WIDTH, ROAD_LENGTH)}
             material={roadMaterial}
           />
-        </>
+          <mesh
+            position={[
+              segment.position[0] - 10,
+              segment.position[1],
+              segment.position[2],
+            ]}
+          >
+            <boxGeometry args={SNAKE_INIT_SIZE} />
+            <meshStandardMaterial color={COLOR.GREEN} />
+          </mesh>
+          <mesh
+            position={[
+              segment.position[0] + 10,
+              segment.position[1],
+              segment.position[2],
+            ]}
+          >
+            <boxGeometry args={SNAKE_INIT_SIZE} />
+            <meshStandardMaterial color={COLOR.GREEN} />
+          </mesh>
+        </group>
       ))}
       <Line
-        ref={lineRef}
         start={[0, 0, roadStartZ + SNAKE_INIT_SIZE[2] / 2]}
-        end={[0, 0, roadStartZ - ROAD_LENGTH * SEGMENT_NUMBER]}
+        end={[
+          0,
+          0,
+          roadStartZ - ROAD_LENGTH * SEGMENT_NUMBER + SNAKE_INIT_SIZE[2] / 2,
+        ]}
       />
     </group>
   );
