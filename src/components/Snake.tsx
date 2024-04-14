@@ -1,6 +1,5 @@
-import { useState, useEffect, forwardRef } from 'react';
-import { useRef } from 'react';
-import { Mesh } from 'three';
+import { a, useSpring } from '@react-spring/three';
+import { forwardRef, useEffect, useState } from 'react';
 
 import {
   COLOR,
@@ -10,13 +9,11 @@ import {
 } from '../constants';
 import { SNAKE_INIT_POSITION } from '../constants';
 
-import { useSpring, a } from '@react-spring/three';
-
 export interface Props {
   initPosition: [number, number, number];
 }
 
-export const Snake = forwardRef(({}, ref) => {
+export const Snake = forwardRef(({}, ref: any) => {
   const [position, setPosition] =
     useState<[number, number, number]>(SNAKE_INIT_POSITION);
   // const snakeRef = useRef<Mesh>(null);

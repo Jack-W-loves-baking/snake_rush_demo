@@ -1,14 +1,20 @@
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import React, { useRef, useState } from 'react';
-import { MeshStandardMaterial } from 'three';
+import { useRef, useState } from 'react';
+import { Group, Mesh } from 'three';
 
-export const Button = ({ position, onClick, label }) => {
-  const ref = useRef();
-  const textRef = useRef();
+import { Position } from '../types';
+
+interface Props {
+  position: Position;
+  onClick: () => void;
+  label: string;
+}
+export const Button = ({ position, onClick, label }: Props) => {
+  const ref = useRef<Group>(null);
+  const textRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [active, setActive] = useState(false);
-  const yRotation = Math.PI / 2;
 
   // Change the scale slightly when hovered or clicked
   useFrame(() => {
@@ -35,7 +41,7 @@ export const Button = ({ position, onClick, label }) => {
         color="black" // Whatever color you need
         anchorX="center" // Center the text horizontally
         anchorY="middle" // Center the text vertically
-        onClick={e => {
+        onClick={() => {
           setActive(!active);
           onClick();
         }}
@@ -43,7 +49,7 @@ export const Button = ({ position, onClick, label }) => {
           e.stopPropagation();
           setHovered(true);
         }}
-        onPointerOut={e => {
+        onPointerOut={() => {
           setHovered(false);
           setActive(false); // Optionally reset on pointer out
         }}

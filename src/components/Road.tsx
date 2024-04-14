@@ -6,16 +6,22 @@ import {
   BLOCK_INIT_SIZE,
   ROAD_INIT_POSITION,
   ROAD_LENGTH,
-  ROAD_SPEED,
   ROAD_WIDTH,
   SEGMENT_NUMBER,
   SNAKE_INIT_SIZE,
 } from '../constants';
-import { Position } from '../types';
 
 import { Button } from './Button';
 import { Line } from './Line';
 
+interface Props {
+  snakeRef: any;
+  setCurIndex: any;
+  answer: string;
+  setTotalCorrect: any;
+  setRoadSpeed: any;
+  roadSpeed: number;
+}
 export const Road = ({
   snakeRef,
   setCurIndex,
@@ -23,7 +29,7 @@ export const Road = ({
   setTotalCorrect,
   setRoadSpeed,
   roadSpeed,
-}: RoadSegment) => {
+}: Props) => {
   const groupRef = useRef<Group>(null);
   const curSegmentRef = useRef<number>(-1);
   const roadStartZ = ROAD_INIT_POSITION[2];
@@ -33,7 +39,7 @@ export const Road = ({
   });
 
   const [stop, setStop] = useState<boolean>(true);
-  const [segments, setSegments] = useState<RoadSegment[]>(() =>
+  const [segments] = useState<any[]>(() =>
     Array.from({ length: SEGMENT_NUMBER }, (_, i) => ({
       position: [
         0,
@@ -64,10 +70,10 @@ export const Road = ({
     if (Math.abs(snakeMove - segmentMove) < 3) {
       if (curSegmentRef.current !== curSegment) {
         if ((snakeX <= 0 && answer === 'a') || (snakeX > 0 && answer === 'b')) {
-          setRoadSpeed(pre => (pre > 7 ? pre : pre + 0.2));
-          setTotalCorrect(pre => pre + 1);
+          setRoadSpeed((pre: any) => (pre > 7 ? pre : pre + 0.2));
+          setTotalCorrect((pre: any) => pre + 1);
         } else {
-          setRoadSpeed(pre => (pre - 0.2 <= 0 ? 0.2 : pre - 0.2));
+          setRoadSpeed((pre: any) => (pre - 0.2 <= 0 ? 0.2 : pre - 0.2));
         }
         curSegmentRef.current = curSegment;
       }
