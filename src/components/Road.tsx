@@ -88,7 +88,7 @@ export const Road = ({
           <mesh
             position={[
               segment.position[0] - 10,
-              segment.position[1],
+              segment.position[1] + 2,
               segment.position[2],
             ]}
           >
@@ -99,7 +99,7 @@ export const Road = ({
           <mesh
             position={[
               segment.position[0] + 10,
-              segment.position[1],
+              segment.position[1] + 2,
               segment.position[2],
             ]}
           >
